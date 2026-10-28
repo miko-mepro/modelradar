@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>模型能力图谱</title>
+  <link rel="stylesheet" href="radar.css">
+  <script defer src="radar-data.js"></script>
+  <script defer src="radar-reference.js"></script>
+  <script defer src="radar-scoring.js"></script>
+  <script defer src="radar.js"></script>
+</head>
+<body>
+<a class="skip" href="#main-content">跳到主要内容</a>
+<div class="app">
+  <aside class="rail" aria-label="主导航">
+    <a class="brand" href="#overview"><span class="brand-icon" aria-hidden="true">◈</span><span>模型能力图谱<small>MODEL ATLAS</small></span></a>
+    <div class="nav-label">能力维度</div>
+    <nav id="navigation" aria-label="总览与维度"></nav>
+    <div class="rail-note"><span class="live-dot"></span>数据快照<p>实测成绩与冻结参考分开展示，<br>排名按用途优先级计算。</p><button class="text-button" id="method-link" type="button">查看评分规则 ↗</button></div>
+  </aside>
+  <main id="main-content" tabindex="-1">
+    <div class="topbar"><div><span class="muted">能力图谱</span><span class="separator">/</span><span id="breadcrumb">总览</span></div><span class="snapshot" id="snapshot"></span></div>
+    <div id="fatal" class="error" role="alert" hidden></div>
+    <div id="route-error" class="error" role="alert" hidden>无法识别这个视图。<a href="#overview">打开总览</a></div>
+    <div id="view-body">
+      <header class="hero">
+        <div class="hero-copy"><div class="eyebrow" id="view-eyebrow">MODEL ATLAS</div><h1 id="view-title" tabindex="-1">模型能力图谱。</h1><p id="view-description"></p><a id="back-link" class="back-link" href="#overview" hidden>← 返回总览</a></div>
+        <div class="hero-stats"><div><strong id="model-count">—</strong><span>模型</span></div><div><strong id="dimension-count">—</strong><span>能力维度</span></div><div><strong id="value-count">—</strong><span>实测评分项</span></div></div>
+      </header>
+      <section id="dimension-deck" class="dimension-deck" aria-label="进入维度"></section>
+      <div class="evidence-note"><span class="note-icon" aria-hidden="true">i</span><p><strong>能力指数与证据构成一起查看。</strong><span id="default-weight-description"></span>维度、综合排名与总览雷达共用冻结参考的同一套评分。每项按参考均值与总体标准差换成标准分，缺项只有在同维证据充分、遮挡验证优于均值基线时才使用近邻估计；其余标记为证据不足，按参考平均水平参与，可能高估或低估真实能力。实测、估计、证据不足分别显示权重占比，均不作为能力分的额外乘数。50 表示参考平均水平，指数不代表正确率或胜率。原始缺项留空，估计单独列出。</p></div>
+      <p id="reference-status" class="reference-notice"></p>
+      <div class="workspace">
+        <section class="card chart-card" aria-labelledby="chart-title">
+          <div class="section-head"><div><div class="eyebrow">CAPABILITY MAP</div><h2 id="chart-title">能力雷达</h2></div><div class="chart-controls"><button type="button" id="chart-back" class="text-button" hidden>← 返回能力雷达</button><div class="scale-toggle" role="group" aria-label="雷达图分数口径"><button type="button" id="scale-absolute" aria-pressed="true">绝对分数</button><button type="button" id="scale-relative" aria-pressed="false">相对分数</button></div></div></div>
+          <div class="chart-frame"><svg id="radar" viewBox="0 0 880 700" role="img" aria-labelledby="radar-title radar-description"><title id="radar-title">能力雷达图</title><desc id="radar-description">各轴为与表格一致的维度指数，50 表示参考平均水平。各点分别说明实测、估计与证据不足的权重占比。</desc></svg></div>
+          <div id="chart-legend" class="chart-legend" aria-label="雷达图对比模型"></div>
+          <div class="chart-foot" id="chart-note"></div>
+        </section>
+        <section class="card compare-card" aria-labelledby="compare-title">
+          <div class="section-head"><div><div class="eyebrow">COMPARE MODELS</div><h2 id="compare-title">选择对比模型</h2></div><span id="selection-count" class="pill"></span></div>
+          <div class="filters"><label class="sr-only" for="model-search">搜索模型或厂商</label><input id="model-search" type="search" placeholder="搜索模型或厂商…" autocomplete="off"><label class="sr-only" for="creator-filter">按厂商筛选</label><select id="creator-filter"><option value="all">全部厂商</option></select></div>
+          <div class="selection-actions"><button id="select-default" type="button">默认对比</button><button id="select-all" type="button">全选</button><button id="select-none" type="button">清空</button></div>
+          <div id="model-list" class="model-list"></div>
+          <p class="micro">勾选控制雷达图。搜索与厂商筛选同时作用于下方表格。</p>
+        </section>
+      </div>
+      <section class="card ranking-card" aria-labelledby="ranking-title">
+        <div class="section-head table-heading"><div><div class="eyebrow">DATA TABLE</div><h2 id="ranking-title">模型数据总览</h2><p id="ranking-description" class="caption"></p></div><div class="table-tools"><span id="table-sort-label" class="caption">综合排名指数高→低</span><label class="check-label"><input id="complete-only" type="checkbox">仅有效实测覆盖 100%</label></div></div>
+        <div id="weight-controls" class="weight-controls" role="group" aria-label="排名优先级与实际权重"></div>
+        <p id="weight-error" class="weight-error" role="alert" hidden></p>
+        <div class="table-scroll"><table id="ranking"><caption id="table-caption" class="sr-only">模型与各能力维度的数值</caption><thead id="ranking-head"></thead><tbody id="ranking-body"></tbody></table></div>
+        <div class="table-foot"><span id="table-count"></span><span>按当前视图的完整标准分降序 · 维度与雷达同一指数 · 实测、估计与证据不足分列</span></div>
+      </section>
+      <section class="card inspector" aria-labelledby="inspector-title">
+        <div class="section-head"><div><div class="eyebrow">INSPECT MODEL</div><h2 id="inspector-title" tabindex="-1">数据明细</h2><p class="caption" id="inspector-description"></p></div><div class="inspector-select"><label for="detail-model" class="sr-only">查看模型数据明细</label><select id="detail-model"></select><a id="model-source" class="text-link" target="_blank" rel="noopener noreferrer">来源页面 ↗</a></div></div>
+        <div id="detail-summary" class="detail-summary"></div>
+        <div class="table-scroll"><table><caption class="sr-only">当前模型逐项实测、近邻估计、固定参考、权重与排名贡献</caption><thead><tr><th scope="col">评测</th><th scope="col">原始实测</th><th scope="col">近邻估计</th><th scope="col">固定参考</th><th scope="col">占总分权重</th><th scope="col">标准分 z</th><th scope="col">加权贡献 w × z</th><th scope="col">状态与验证依据</th></tr></thead><tbody id="detail-body"></tbody></table></div>
+      </section>
+      <details class="card methodology" id="method">
+        <summary>评分规则与数据接口 <span>权重、计算公式与参考约束</span></summary>
+        <div class="method-grid">
+          <div><h3>冻结参考与标准化</h3><p><code>radar-data.js</code> 提供实测数据，<code>radar-reference.js</code> 提供冻结的参考模型、配置、数据版本、参考时间及逐项成绩。参考成绩顺序与参考模型列表一致，缺项为 <code>null</code>，0 分属于有效实测。搜索、筛选、勾选和增删展示模型均不改变参考基准。</p><p>每项至少需要 5 条有效参考。均值为 <code>μ_j = Σx / n</code>，总体标准差为 <code>σ_j = √(Σ(x − μ_j)² / n)</code>，标准分为 <code>z_mj = (x_mj − μ_j) / σ_j</code>。参考不足或标准差为零时明确移出计分，其余有效项目统一归一权重。参考样本只有十来个模型，尺度估计本身存在误差，模型间一至三分的差距不足以单独断定强弱。</p></div>
+          <div><h3>用途与固定的两层权重</h3><p>维度与评测均使用优先级：0 不纳入、1 一般、2 重要、3 核心。默认用途侧重编码、推理、长文与工具工作流，可调整并恢复默认。维度权重为 <code>W_d = p_d / Σp</code>，维度内分项权重为 <code>v_dj = q_j / Σq_同维度</code>，分项占总分权重为 <code>w_j = W_d × v_dj</code>。分项求和只包含可标准化的项目。</p><p>同一套权重适用于所有模型，模型缺项不重新分配权重。至少一个维度须有正优先级，每个纳入综合排名的维度须至少有一项参考有效、正优先级的评测；否则明确提示，评分显示“—”。维度优先级为 0 时仍可查看其维度指数，但不进入综合分；维度内有效分项全部为 0 时，该维度显示“—”。</p></div>
+          <div><h3>同维度近邻与回归估计</h3><p>缺项只使用同一维度内、已纳入且有真实实测的其他评测作为比较项。候选参考模型必须同时具备目标项和全部比较项实测，候选至少 5 个；同一模型不能作为自己的邻居。按比较项标准分差的均方根距离选择最近 3 个，距离相同按冻结参考顺序排列。</p><p>目标成绩的邻居中位数为锚点 <code>y₀</code>，各比较项的邻居中位数为 <code>a_j</code>。邻居特征为 <code>D_ij = (x_ij − a_j) / σ_j</code>，目标差为 <code>t_i = (y_i − y₀) / σ_目标</code>。固定收缩系数 <code>λ = 1</code>，局部回归系数为 <code>β = (DᵀD + λI)⁻¹Dᵀt</code>，候选估计为 <code>ŷ = y₀ + σ_目标 × Σ[β_j × (x_待估,j − a_j) / σ_j]</code>。各项尺度取自参考标准差，收缩用于限制小样本下的校正幅度。</p><p>比较项只使用真实实测，不跨维度外推；优先级为 0 的评测不作为比较项。参考 <a href="https://scikit-learn.org/stable/modules/impute.html#nearest-neighbors-imputation" target="_blank" rel="noopener noreferrer">近邻插补</a>与 <a href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html" target="_blank" rel="noopener noreferrer">岭回归</a>原理。候选估计单独保存，不写回原始 <code>breakdown</code>；明细展示锚点、各比较项校正量以及是否采用。</p></div>
+          <div><h3>遮挡验证与启用条件</h3><p>每个“目标项＋比较项组合”单独进行留一遮挡验证。每次完整移除被验证模型，用其余参考重新计算均值和标准差、寻找邻居、拟合局部回归，并与其余参考的目标项均值预测比较。验证与实际补分共用同一套锚点和校正公式。只有可以完整预测的案例进入两种方法共同的验证集合，越界预测照常计入验证误差。</p><p>至少 5 个有效验证案例，且校正估计的平均绝对误差 <code>MAE = mean(|预测 − 实测|)</code> 严格小于均值基线 MAE，才启用该规则。验证未通过、候选不足、没有相关实测或候选估计超出 0–100 时，标记“证据不足”，按 <code>z = 0</code> 参与，明细说明原因。验证通过仅说明该参考样本上的误差更低，不保证未知成绩准确；无相关证据时，中性值是必须排名时的约定。</p></div>
+          <div><h3>维度、综合指数与证据构成</h3><p>实测项使用实测标准分；估计项使用经验证的近邻估计标准分；证据不足项使用 0。维度标准分为 <code>Z_md = Σ(v_dj × z_mj)</code>，综合标准分为 <code>Z_m = Σ(W_d × Z_md)</code>；二者分别通过 <code>S = 100 / (1 + exp(−Z))</code> 映射为指数。50 表示参考平均水平，不代表正确率或胜率。综合分合成维度标准分，不平均已映射的指数。</p><p>每个分项按状态归入实测、估计或证据不足，三类分别累加固定权重，合计 100%。维度展示维度内占比，综合展示占总分比例；三类占比不乘入能力分，估计不计入实测覆盖。“仅有效实测覆盖 100%”按当前综合权重筛选。总览与维度均按对应完整标准分降序，同分时按 AA 智力指数、数据顺序排列。</p></div>
+          <div><h3>展示与数据接口约束</h3><p>表格维度列和总览雷达共用维度指数；分项图只展示原始实测。相对图以全部展示模型中的该维最高指数或该项最高实测为 100，只缩放图形。原始缺项显示“—”，近邻估计独立列出，明细提供参考均值、标准差、权重、贡献、邻居、中位锚点、回归校正量和验证误差。</p><p>模型需提供 <code>id</code>、<code>name</code>、<code>detail</code>、<code>creator</code>、<code>color</code>、<code>url</code>、<code>breakdown</code> 和 <code>intelligenceIndex</code>。维度 <code>items</code> 提供 <code>key</code>、<code>label</code>、<code>metric</code>、<code>source</code>；维度与各项均提供整数 <code>defaultPriority</code>（0–3）。<code>breakdown</code> 仅记录 0–100 的实测，未知维度或键直接报错。人类偏好 Elo 预先按冻结参照换算为 <code>100 / (1 + 10^(-(elo − eloRef) / 400))</code>。</p><p>增加展示模型只需写入展示数据；增加评测须提供匹配的参考记录，尚无参考时显式记录 <code>null</code>，该项不计分。新增维度若没有可用评测，默认维度优先级须为 0。评测名称、来源或计分口径与冻结参考不一致时直接报错，须提供匹配参考版本。</p></div>
+        </div>
+        <div class="source-block"><h3>数据来源</h3><p id="source-description"></p><div id="model-sources" class="source-links"></div></div>
+      </details>
+      <footer>MODEL ATLAS <span>冻结参考 · 均值与标准差 · 实测与估计分列</span></footer>
+    </div>
+    <noscript><div class="error">请启用 JavaScript 查看雷达与数据表格。</div></noscript>
+  </main>
+</div>
+<div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+</body>
+</html>
